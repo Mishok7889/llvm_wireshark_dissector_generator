@@ -74,8 +74,9 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);${SolutionDir}\llvm\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\clang\include;..\llvm\include;.\..\build\include;C:\Users\Mishanya\git_itv\llvm-project\build\tools\clang\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\LLVM\include</IncludePath>
     <ReferencePath>$(VC_ReferencesPath_x64);${SolutionDir}\lib</ReferencePath>
+    <LibraryPath>C:\Program Files\LLVM\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -117,7 +118,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mishanya\git_itv\llvm-project\build\lib;C:\Users\Mishanya\git_itv\llvm-project\build\Debug\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Version.lib;C:\Users\Mishanya\git_itv\llvm-project\build\Debug\lib\clangAST.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Version.lib;clangAnalysis.lib;clangAnalysisFlowSensitive.lib;clangAnalysisFlowSensitiveModels.lib;clangAPINotes.lib;clangARCMigrate.lib;clangAST.lib;clangASTMatchers.lib;clangBasic.lib;clangCodeGen.lib;clangCrossTU.lib;clangDependencyScanning.lib;clangDirectoryWatcher.lib;clangDriver.lib;clangDynamicASTMatchers.lib;clangEdit.lib;clangExtractAPI.lib;clangFormat.lib;clangFrontend.lib;clangFrontendTool.lib;clangHandleCXX.lib;clangHandleLLVM.lib;clangIndex.lib;clangIndexSerialization.lib;clangInterpreter.lib;clangLex.lib;clangParse.lib;clangRewrite.lib;clangRewriteFrontend.lib;clangSema.lib;clangSerialization.lib;clangStaticAnalyzerCheckers.lib;clangStaticAnalyzerCore.lib;clangStaticAnalyzerFrontend.lib;clangSupport.lib;clangTooling.lib;clangToolingASTDiff.lib;clangToolingCore.lib;clangToolingInclusions.lib;clangToolingInclusionsStdlib.lib;clangToolingRefactoring.lib;clangToolingSyntax.lib;clangTransformer.lib;libclang.lib;LLVM-C.lib;LLVMAArch64AsmParser.lib;LLVMAArch64CodeGen.lib;LLVMAArch64Desc.lib;LLVMAArch64Disassembler.lib;LLVMAArch64Info.lib;LLVMAArch64Utils.lib;LLVMAggressiveInstCombine.lib;LLVMAMDGPUAsmParser.lib;LLVMAMDGPUCodeGen.lib;LLVMAMDGPUDesc.lib;LLVMAMDGPUDisassembler.lib;LLVMAMDGPUInfo.lib;LLVMAMDGPUTargetMCA.lib;LLVMAMDGPUUtils.lib;LLVMAnalysis.lib;LLVMARMAsmParser.lib;LLVMARMCodeGen.lib;LLVMARMDesc.lib;LLVMARMDisassembler.lib;LLVMARMInfo.lib;LLVMARMUtils.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMAVRAsmParser.lib;LLVMAVRCodeGen.lib;LLVMAVRDesc.lib;LLVMAVRDisassembler.lib;LLVMAVRInfo.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitstreamReader.lib;LLVMBitWriter.lib;LLVMBPFAsmParser.lib;LLVMBPFCodeGen.lib;LLVMBPFDesc.lib;LLVMBPFDisassembler.lib;LLVMBPFInfo.lib;LLVMCFGuard.lib;LLVMCFIVerify.lib;LLVMCodeGen.lib;LLVMCodeGenTypes.lib;LLVMCore.lib;LLVMCoroutines.lib;LLVMCoverage.lib;LLVMDebugInfoBTF.lib;LLVMDebugInfoCodeView.lib;LLVMDebuginfod.lib;LLVMDebugInfoDWARF.lib;LLVMDebugInfoGSYM.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoPDB.lib;LLVMDemangle.lib;LLVMDiff.lib;LLVMDlltoolDriver.lib;LLVMDWARFLinker.lib;LLVMDWARFLinkerClassic.lib;LLVMDWARFLinkerParallel.lib;LLVMDWP.lib;LLVMExecutionEngine.lib;LLVMExegesis.lib;LLVMExegesisAArch64.lib;LLVMExegesisMips.lib;LLVMExegesisPowerPC.lib;LLVMExegesisX86.lib;LLVMExtensions.lib;LLVMFileCheck.lib;LLVMFrontendDriver.lib;LLVMFrontendHLSL.lib;LLVMFrontendOffloading.lib;LLVMFrontendOpenACC.lib;LLVMFrontendOpenMP.lib;LLVMFuzzerCLI.lib;LLVMFuzzMutate.lib;LLVMGlobalISel.lib;LLVMHexagonAsmParser.lib;LLVMHexagonCodeGen.lib;LLVMHexagonDesc.lib;LLVMHexagonDisassembler.lib;LLVMHexagonInfo.lib;LLVMHipStdPar.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterfaceStub.lib;LLVMInterpreter.lib;LLVMipo.lib;LLVMIRPrinter.lib;LLVMIRReader.lib;LLVMJITLink.lib;LLVMLanaiAsmParser.lib;LLVMLanaiCodeGen.lib;LLVMLanaiDesc.lib;LLVMLanaiDisassembler.lib;LLVMLanaiInfo.lib;LLVMLibDriver.lib;LLVMLineEditor.lib;LLVMLinker.lib;LLVMLoongArchAsmParser.lib;LLVMLoongArchCodeGen.lib;LLVMLoongArchDesc.lib;LLVMLoongArchDisassembler.lib;LLVMLoongArchInfo.lib;LLVMLTO.lib;LLVMMC.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMMipsAsmParser.lib;LLVMMipsCodeGen.lib;LLVMMipsDesc.lib;LLVMMipsDisassembler.lib;LLVMMipsInfo.lib;LLVMMIRParser.lib;LLVMMSP430AsmParser.lib;LLVMMSP430CodeGen.lib;LLVMMSP430Desc.lib;LLVMMSP430Disassembler.lib;LLVMMSP430Info.lib;LLVMNVPTXCodeGen.lib;LLVMNVPTXDesc.lib;LLVMNVPTXInfo.lib;LLVMObjCARCOpts.lib;LLVMObjCopy.lib;LLVMObject.lib;LLVMObjectYAML.lib;LLVMOptDriver.lib;LLVMOption.lib;LLVMOrcDebugging.lib;LLVMOrcJIT.lib;LLVMOrcShared.lib;LLVMOrcTargetProcess.lib;LLVMPasses.lib;LLVMPowerPCAsmParser.lib;LLVMPowerPCCodeGen.lib;LLVMPowerPCDesc.lib;LLVMPowerPCDisassembler.lib;LLVMPowerPCInfo.lib;LLVMProfileData.lib;LLVMRemarks.lib;LLVMRISCVAsmParser.lib;LLVMRISCVCodeGen.lib;LLVMRISCVDesc.lib;LLVMRISCVDisassembler.lib;LLVMRISCVInfo.lib;LLVMRISCVTargetMCA.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSparcAsmParser.lib;LLVMSparcCodeGen.lib;LLVMSparcDesc.lib;LLVMSparcDisassembler.lib;LLVMSparcInfo.lib;LLVMSupport.lib;LLVMSymbolize.lib;LLVMSystemZAsmParser.lib;LLVMSystemZCodeGen.lib;LLVMSystemZDesc.lib;LLVMSystemZDisassembler.lib;LLVMSystemZInfo.lib;LLVMTableGen.lib;LLVMTableGenCommon.lib;LLVMTableGenGlobalISel.lib;LLVMTarget.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTextAPIBinaryReader.lib;LLVMTransformUtils.lib;LLVMVEAsmParser.lib;LLVMVECodeGen.lib;LLVMVectorize.lib;LLVMVEDesc.lib;LLVMVEDisassembler.lib;LLVMVEInfo.lib;LLVMWebAssemblyAsmParser.lib;LLVMWebAssemblyCodeGen.lib;LLVMWebAssemblyDesc.lib;LLVMWebAssemblyDisassembler.lib;LLVMWebAssemblyInfo.lib;LLVMWebAssemblyUtils.lib;LLVMWindowsDriver.lib;LLVMWindowsManifest.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86TargetMCA.lib;LLVMXCoreCodeGen.lib;LLVMXCoreDesc.lib;LLVMXCoreDisassembler.lib;LLVMXCoreInfo.lib;LLVMXRay.lib;LTO.lib;Remarks.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,59 +145,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StructJsonConvertor.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\build\lib\IR\LLVMCore.vcxproj">
-      <Project>{20385b23-0801-31ce-983f-234b1a70cdb8}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\lib\Support\BLAKE3\LLVMSupportBlake3.vcxproj">
-      <Project>{f6a60e31-a101-30f6-876f-faff2c3abbc8}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\lib\Support\LLVMSupport.vcxproj">
-      <Project>{8959533e-83da-3944-9c1d-752709936ef6}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\lib\WindowsDriver\LLVMWindowsDriver.vcxproj">
-      <Project>{b5abee1d-005d-3927-a922-183024745169}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\include\clang\Driver\ClangDriverOptions.vcxproj">
-      <Project>{c184f14a-81b4-3a42-bd3b-90ba4bb05457}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\ASTMatchers\clangASTMatchers.vcxproj">
-      <Project>{05b6a6f8-abd9-326a-a142-9d69ab0a119f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\AST\clangAST.vcxproj">
-      <Project>{3e48d85d-9b7f-36a9-a4dd-451b8d595d4f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\Driver\clangDriver.vcxproj">
-      <Project>{044f1dae-d646-3277-9c36-394a97720b2e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\Driver\obj.clangDriver.vcxproj">
-      <Project>{843f3273-060c-3ff5-b92a-6b08ab724bf5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\FrontendTool\clangFrontendTool.vcxproj">
-      <Project>{11177a4d-a5d3-3243-a509-0a9ccafe0381}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\FrontendTool\obj.clangFrontendTool.vcxproj">
-      <Project>{9e939979-cc8a-3267-98b9-183fb9d3851d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\Frontend\clangFrontend.vcxproj">
-      <Project>{9b5a9d7f-3b1f-39df-9b5b-394a999e0914}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\Frontend\obj.clangFrontend.vcxproj">
-      <Project>{531e7248-4a33-3f63-ab33-21637e2a8b22}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\Tooling\clangTooling.vcxproj">
-      <Project>{82a669a5-3c20-360e-88d5-a61b0ee9b7d1}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\lib\Tooling\Core\clangToolingCore.vcxproj">
-      <Project>{7f4e85f7-12f5-3781-820e-b67cf4d2c551}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\tools\driver\clang.vcxproj">
-      <Project>{a9f690b1-0fe0-341b-be1f-5f1828586564}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\build\tools\clang\unittests\Driver\ClangDriverTests.vcxproj">
-      <Project>{5a0bf455-d025-3e6d-800e-3bdce3d698d7}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
