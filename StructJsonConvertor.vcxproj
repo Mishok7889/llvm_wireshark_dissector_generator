@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{51b0c051-43fb-4299-b488-c8b961a62807}</ProjectGuid>
+    <RootNamespace>StructJsonConvertor</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);${SolutionDir}\llvm\include</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\clang\include;..\llvm\include;.\..\build\include;C:\Users\Mishanya\git_itv\llvm-project\build\tools\clang\include</IncludePath>
+    <ReferencePath>$(VC_ReferencesPath_x64);${SolutionDir}\lib</ReferencePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Mishanya\git_itv\llvm-project\build\lib;C:\Users\Mishanya\git_itv\llvm-project\build\Debug\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Version.lib;C:\Users\Mishanya\git_itv\llvm-project\build\Debug\lib\clangAST.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="StructJsonConvertor.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\build\lib\IR\LLVMCore.vcxproj">
+      <Project>{20385b23-0801-31ce-983f-234b1a70cdb8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\lib\Support\BLAKE3\LLVMSupportBlake3.vcxproj">
+      <Project>{f6a60e31-a101-30f6-876f-faff2c3abbc8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\lib\Support\LLVMSupport.vcxproj">
+      <Project>{8959533e-83da-3944-9c1d-752709936ef6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\lib\WindowsDriver\LLVMWindowsDriver.vcxproj">
+      <Project>{b5abee1d-005d-3927-a922-183024745169}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\include\clang\Driver\ClangDriverOptions.vcxproj">
+      <Project>{c184f14a-81b4-3a42-bd3b-90ba4bb05457}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\ASTMatchers\clangASTMatchers.vcxproj">
+      <Project>{05b6a6f8-abd9-326a-a142-9d69ab0a119f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\AST\clangAST.vcxproj">
+      <Project>{3e48d85d-9b7f-36a9-a4dd-451b8d595d4f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\Driver\clangDriver.vcxproj">
+      <Project>{044f1dae-d646-3277-9c36-394a97720b2e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\Driver\obj.clangDriver.vcxproj">
+      <Project>{843f3273-060c-3ff5-b92a-6b08ab724bf5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\FrontendTool\clangFrontendTool.vcxproj">
+      <Project>{11177a4d-a5d3-3243-a509-0a9ccafe0381}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\FrontendTool\obj.clangFrontendTool.vcxproj">
+      <Project>{9e939979-cc8a-3267-98b9-183fb9d3851d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\Frontend\clangFrontend.vcxproj">
+      <Project>{9b5a9d7f-3b1f-39df-9b5b-394a999e0914}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\Frontend\obj.clangFrontend.vcxproj">
+      <Project>{531e7248-4a33-3f63-ab33-21637e2a8b22}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\Tooling\clangTooling.vcxproj">
+      <Project>{82a669a5-3c20-360e-88d5-a61b0ee9b7d1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\lib\Tooling\Core\clangToolingCore.vcxproj">
+      <Project>{7f4e85f7-12f5-3781-820e-b67cf4d2c551}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\tools\driver\clang.vcxproj">
+      <Project>{a9f690b1-0fe0-341b-be1f-5f1828586564}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\tools\clang\unittests\Driver\ClangDriverTests.vcxproj">
+      <Project>{5a0bf455-d025-3e6d-800e-3bdce3d698d7}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
