@@ -5,7 +5,7 @@ enum class D { AA, BB, CC };
 struct C
 {
   int a;
-  bool b;
+  //bool b;
   D dd;
 };
 
@@ -35,6 +35,8 @@ struct TrivialA
   uint64_t l;
 
   D df;
+
+  B bbb;
 
   uint8_t aaa[10];
 };

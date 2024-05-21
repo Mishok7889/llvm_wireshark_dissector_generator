@@ -59,14 +59,15 @@ std::string toUppercase(const std::string& val,
 
 struct StructField {
 public:
-	StructField(std::string_view name, std::string_view type, int size) : m_name(name), m_type(type), m_size(size) {}
+	StructField(std::string_view name, std::string_view protoName, std::string_view type, int size) : m_name(name), m_lowercaseProtoName(protoName), m_type(type), m_size(size) {}
 
 	virtual ~StructField() {};
 
 	virtual std::string
-		getWiresharkAddItemStatement(const std::string& treeName,
-			const std::string& hfIndex) const = 0;
+		getWiresharkAddItemStatement(std::string_view treeName,
+			std::string_view hfIndex) const = 0;
 	virtual std::optional<std::string> getMapValueWiresharkStatement() const = 0;
+	virtual std::string getRegisterStatement() const = 0;
 	const std::string& getType() const
 	{
 		return m_type;
@@ -75,6 +76,7 @@ public:
 public:
 	std::string m_type;
 	std::string m_name;
+	std::string m_lowercaseProtoName;
 	int m_size;
 };
 
@@ -83,6 +85,7 @@ struct StructInfo {
 	std::vector<std::unique_ptr<StructField>> fields;
 	std::vector<std::string> fileDeclarations;
 	std::vector<std::string> subTreeItems;
+	std::map<std::string, std::string> subStructsDefinition; //Map name of struct, definition
 
 	std::string getLowercaseName() const { return toLowercase(name); }
 };
@@ -127,23 +130,112 @@ std::string mapTypeToWiresharkType(const StructField& field) {
 	}
 
 	//TODO: refactor static array check
-	if (typeIsStaticArray)
+	if (typeIsStaticArray(type))
 	{
 		return "FT_BYTES";
 	}
 
 	std::cerr << "Invalid type, cannot map(" << type << ")\n";
-	return "UNKNOWN_TYPE(" + type + ")";
+	//return "UNKNOWN_TYPE(" + type + ")";
+	return "";
 }
 
-struct ConstantArrayField final : public StructField {
-	ConstantArrayField(std::string_view name, std::string_view type, int sizeOfSingleElement, int numberOfElements)
-		: StructField(name, type, sizeOfSingleElement* numberOfElements), m_sizeOfSingleElement(sizeOfSingleElement), m_numberOfElements(numberOfElements) {
+std::string mapToRegister(const StructField& field, std::string protoName)
+{
+	const auto lowercaseProtoName = toLowercase(protoName);
+
+	std::string res;
+
+	const auto fieldType = mapTypeToWiresharkType(field);
+	if (fieldType.empty()) return "";
+
+	const auto fieldNameId =
+		"hf_" + lowercaseProtoName + '_' + toLowercase(field.m_name, "_");
+	const auto fieldName =
+		toUppercase(lowercaseProtoName) + ' ' + toLowercase(field.m_name);
+	const auto fieldAbbrev =
+		toLowercase(lowercaseProtoName) + "." + toLowercase(field.m_name, "_");
+
+	const auto displayBase = mapTypeToWiresharkDisplayBase(field);
+
+	const auto valueMappingList = field.getMapValueWiresharkStatement();
+	const auto valueMapping =
+		valueMappingList
+		? ("VALS(" + toLowercase(field.m_name) + "Names)")
+		: "NULL";
+
+	const auto bitFlag = "0x0";
+	res += std::format(R"(
+{{
+	&{}, {{ "{}", "{}",
+	{}, {},
+	{}, {},
+	NULL, HFILL }}
+}},
+)", fieldNameId, fieldName, fieldAbbrev, fieldType, displayBase, valueMapping, bitFlag);
+
+	return res;
+}
+
+struct SubstructField final : public StructField {
+	SubstructField(std::string_view name, StructInfo&& sInfo, std::string_view type, int size)
+		: StructField(name, sInfo.name, type, size), m_structInfo(std::move(sInfo)) {
 
 	}
 
-	std::string getWiresharkAddItemStatement(const std::string& treeName,
-		const std::string& hfIndex) const override {
+	std::string getRegisterStatement() const override
+	{
+		std::string res;
+
+		for (const auto& el : m_structInfo.fields)
+		{
+			res += el->getRegisterStatement();
+		}
+
+		return res;
+	}
+
+	std::string getWiresharkAddItemStatement(std::string_view treeName, std::string_view hfIndex) const override {
+		std::string res;
+
+		res += std::format(R"(dissect_{}(tvb, pinfo, {}, offset); )", toLowercase(m_type), treeName);
+		res += "\n";
+
+		res += std::format("offset += {};", m_size);
+
+		return res;
+	}
+
+	std::optional<std::string> getMapValueWiresharkStatement() const override {
+		std::string res;
+
+		for (const auto& el : m_structInfo.fields)
+		{
+			if (const auto val = el->getMapValueWiresharkStatement())
+			{
+				res += *val + '\n';
+			}
+		}
+
+		return res;
+	}
+private:
+	StructInfo m_structInfo;
+};
+
+struct ConstantArrayField final : public StructField {
+	ConstantArrayField(std::string_view name, std::string_view protoName, std::string_view type, int sizeOfSingleElement, int numberOfElements)
+		: StructField(name, protoName, type, sizeOfSingleElement* numberOfElements), m_sizeOfSingleElement(sizeOfSingleElement), m_numberOfElements(numberOfElements) {
+
+	}
+
+	std::string getRegisterStatement() const override
+	{
+		return mapToRegister(*this, m_lowercaseProtoName);
+	}
+
+	std::string getWiresharkAddItemStatement(std::string_view treeName,
+		std::string_view hfIndex) const override {
 		std::string res;
 		res += std::format(R"(wmem_allocator_t *allocator = wmem_packet_scope();)");
 		res += "\n";
@@ -170,9 +262,14 @@ private:
 
 struct EnumField final : public StructField {
 	// Using designated initializers in the constructor
-	EnumField(std::string&& type, std::string&& name,
-		int size, std::map<std::string, long>& enumFileds)
-		: StructField(name, type, size), enumFields(enumFileds) {}
+	EnumField(std::string_view type, std::string_view protoName, std::string_view name,
+		int size, std::map<std::string, long>& enumFields)
+		: StructField(name, protoName, type, size), enumFields(enumFields) {}
+
+	std::string getRegisterStatement() const override
+	{
+		return mapToRegister(*this, m_lowercaseProtoName);
+	}
 
 	std::string getValueStringMapping() const {
 		std::ostringstream code;
@@ -193,8 +290,8 @@ struct EnumField final : public StructField {
 	}
 
 	std::string getWiresharkAddItemStatement(
-		const std::string& treeName,
-		const std::string& hfIndex) const override {
+		std::string_view treeName,
+		std::string_view hfIndex) const override {
 		std::ostringstream code;
 
 		const auto listName = m_name + "Names";
@@ -211,12 +308,17 @@ struct EnumField final : public StructField {
 
 struct StructTrivialField : public StructField {
 	// Using designated initializers in the constructor
-	StructTrivialField(std::string&& type, std::string&& name, int size)
-		: StructField(name, type, size) {}
+	StructTrivialField(std::string_view type, std::string_view protoName, std::string_view name, int size)
+		: StructField(name, protoName, type, size) {}
+
+	std::string getRegisterStatement() const override
+	{
+		return mapToRegister(*this, m_lowercaseProtoName);
+	}
 
 	virtual std::string getWiresharkAddItemStatement(
-		const std::string& treeName,
-		const std::string& hfIndex) const override final {
+		std::string_view treeName,
+		std::string_view hfIndex) const override final {
 		std::ostringstream code;
 		/*if (getType() == "char") {
 		  code << "proto_tree_add_string_format(" << treeName << "," << hfIndex
@@ -263,7 +365,7 @@ std::string generateIncludes(const StructInfo& sInfo) {
 		" return ss.str();\n"
 		"}\n\n";
 
-	os << "static void preActions(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree _U_, void* "
+	os << "static void preActions(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree, void* "
 		"data _U_){\n\n}";
 
 	return os.str();
@@ -278,9 +380,6 @@ std::string generateProtoRegister(StructInfo& sInfo) {
 	os << "extern \"C\" void proto_register_" << lowercaseProtoName
 		<< "(void)\n{";
 
-	sInfo.fileDeclarations.push_back("static int proto_" + lowercaseProtoName +
-		";");
-
 	os << "proto_" << lowercaseProtoName << " = proto_register_protocol(\""
 		<< sInfo.name << "\",\"" << sInfo.name << "\",\"" << lowercaseProtoName
 		<< "\");\n";
@@ -288,45 +387,7 @@ std::string generateProtoRegister(StructInfo& sInfo) {
 	os << "static hf_register_info hf[]{\n";
 
 	for (const auto& field : sInfo.fields) {
-		os << "{";
-
-		const auto fieldNameId =
-			"hf_" + lowercaseProtoName + '_' + toLowercase(field->m_name, "_");
-		const auto fieldName =
-			toUppercase(lowercaseProtoName) + ' ' + toLowercase(field->m_name);
-		const auto fieldAbbrev =
-			toLowercase(lowercaseProtoName) + "." + toLowercase(field->m_name, "_");
-
-		const auto fieldType = mapTypeToWiresharkType(*field);
-		const auto displayBase = mapTypeToWiresharkDisplayBase(*field);
-
-		const auto valueMappingList = field->getMapValueWiresharkStatement();
-		const auto valueMapping =
-			valueMappingList.has_value()
-			? ("VALS(" + toLowercase(field->m_name) + "Names)")
-			: "NULL";
-		if (valueMappingList.has_value()) {
-			sInfo.fileDeclarations.push_back(valueMappingList.value());
-		}
-
-		const auto bitFlag = "0x0";
-
-		os << "&" << fieldNameId
-			<< ","
-			"  { \""
-			<< fieldName << "\", \"" << fieldAbbrev
-			<< "\",\n"
-			"    "
-			<< fieldType << ", " << displayBase
-			<< ",\n"
-			"    "
-			<< valueMapping << ", " << bitFlag
-			<< ",\n"
-			"    NULL, HFILL }";
-
-		os << "},\n\n";
-
-		sInfo.fileDeclarations.push_back("static int " + fieldNameId + ";");
+		os << field->getRegisterStatement();
 	}
 
 	os << "};\n";
@@ -366,57 +427,173 @@ std::string generateRegisterHandoff(const StructInfo& sInfo) {
 	return os.str();
 }
 
-std::string generateDissector(StructInfo& structInfo) {
-	std::ostringstream code;
+std::string generateDissectorBody(StructInfo& structInfo) {
+	std::string res;
 
 	const auto lowercaseName = structInfo.getLowercaseName();
 
-	code << "static int dissect_" << structInfo.getLowercaseName()
-		<< "(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree _U_, void* "
-		"data _U_){ \n";
-
-	code << "preActions(tvb, pinfo, tree, data);\n\n";
-
-	code << "int offset = 0;\n\n";
-
-	code << "col_set_str(pinfo->cinfo, COL_PROTOCOL, \"" << structInfo.name
-		<< "\" );\n";
-	code << "col_clear(pinfo->cinfo, COL_INFO);\n\n";
-
-	code << "static int ett_" << lowercaseName << ";\n";
-	structInfo.subTreeItems.push_back("ett_" + lowercaseName);
-	structInfo.fileDeclarations.push_back("static int ett_" + lowercaseName +
-		";");
-
-	code << "proto_item *ti = proto_tree_add_item(tree"
-		<< ", proto_" << lowercaseName << ", tvb, 0, -1, ENC_NA);\n";
-	code << "proto_tree *" << lowercaseName
-		<< "_tree = proto_item_add_subtree(ti, ett_" << lowercaseName
-		<< ");\n\n";
-
 	for (const auto& field : structInfo.fields) {
-		code << "{\n";
-		code << field->getWiresharkAddItemStatement(
-			lowercaseName + "_tree", "hf_" + lowercaseName + "_" + field->m_name);
-		code << "}\n";
-		code << "\n\n";
+		res += "{\n";
+		res += field->getWiresharkAddItemStatement(
+			lowercaseName + "_tree", "hf_" + lowercaseName + "_" + toLowercase(field->m_name));
+		res += "}\n";
+		res += "\n\n";
+
+		const auto fieldNameId =
+			"hf_" + structInfo.getLowercaseName() + '_' + toLowercase(field->m_name, "_");
+		structInfo.fileDeclarations.push_back("static int " + fieldNameId + ";");
 	}
 
-	code << "return tvb_captured_length(tvb); }\n";
+	res += "return tvb_captured_length(tvb);";
 
-	return code.str();
+	return res;
+}
+
+std::string generateMainDissector(StructInfo& structInfo)
+{
+	std::string res;
+
+	const auto lowercaseName = structInfo.getLowercaseName();
+
+	structInfo.fileDeclarations.push_back("static int proto_" + structInfo.getLowercaseName() + ";");
+	structInfo.subTreeItems.push_back("ett_" + lowercaseName);
+	structInfo.fileDeclarations.push_back("static int ett_" + lowercaseName + ";");
+
+	res += +"static int dissect_" + structInfo.getLowercaseName()
+		+ "(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree, void* "
+		"data _U_){ \n";
+
+	res += "preActions(tvb, pinfo, tree, data);\n\n";
+	res += "int offset = 0;\n\n";
+
+	res += "col_set_str(pinfo->cinfo, COL_PROTOCOL, \"" + structInfo.name
+		+ "\" );\n";
+	res += "col_clear(pinfo->cinfo, COL_INFO);\n\n";
+
+	res += "proto_item *subtree = proto_tree_add_item(tree, proto_" + lowercaseName + ", tvb, 0, -1, ENC_NA);\n";
+
+	res += "proto_tree *" + lowercaseName
+		+ "_tree = proto_item_add_subtree(subtree, ett_" + lowercaseName
+		+ ");\n\n";
+
+	res += generateDissectorBody(structInfo);
+
+	res += " }\n";
+
+	return res;
+}
+
+std::string generateSubDissector(StructInfo& structInfo)
+{
+	std::string res;
+
+	const auto lowercaseName = structInfo.getLowercaseName();
+
+
+	const auto hfIndex = "hf_" + toLowercase(structInfo.name) + "_item";
+	structInfo.fileDeclarations.push_back("static int proto_" + structInfo.getLowercaseName() + ";");
+	structInfo.fileDeclarations.push_back("static int " + hfIndex + ";");
+
+	res += +"static int dissect_" + structInfo.getLowercaseName()
+		+ "(tvbuff_t* tvb, packet_info* pinfo, proto_tree* subtree, int offset){ \n";
+
+	res += "proto_tree *" + lowercaseName + "_tree = proto_tree_add_subtree(subtree, tvb, offset, -1, " + hfIndex + ", 0, \"\"); \n\n";
+
+	res += generateDissectorBody(structInfo);
+
+	res += " }\n";
+
+	return res;
 }
 
 std::string GeneratedParserString;
 
 std::string generateFileDeclarations(StructInfo& structInfo) {
-	std::ostringstream os;
+	std::string res;
 
 	for (const auto& el : structInfo.fileDeclarations) {
-		os << el << '\n';
+		res += el + '\n';
 	}
 
-	return os.str();
+	res += "\n\n";
+
+	for (auto rit = structInfo.subStructsDefinition.rbegin(); rit != structInfo.subStructsDefinition.rend(); ++rit) {
+		res += rit->second + '\n';
+	}
+
+	for (const auto& el : structInfo.fields) {
+		if (const auto val = el->getMapValueWiresharkStatement())
+		{
+			res += *val;
+		}
+	}
+
+	return res;
+}
+
+void processStruct(const RecordDecl* declaration, const ASTContext& context, StructInfo& structInfo, StructInfo& mainStruct) {
+	for (auto* field : declaration->fields()) {
+		const auto type = field->getType();
+		const auto typeStr = field->getType().getAsString();
+		const auto name = field->getName().str();
+		const auto size = context.getTypeSize(type) / 8;
+
+		if (const RecordType* RT = field->getType()->getAs<RecordType>()) {
+			if (RT->getDecl()->isThisDeclarationADefinition()) {
+				// Process Struct
+
+				const auto record = RT->getDecl();
+				StructInfo subInfo{ .name = typeStr };
+
+				processStruct(record, context, subInfo, structInfo);
+
+				auto& defMap = structInfo.subStructsDefinition;
+				if (defMap.find(typeStr) == defMap.end())
+				{
+					mainStruct.subStructsDefinition[typeStr] = generateSubDissector(subInfo);
+				}
+				mainStruct.fileDeclarations.insert(mainStruct.fileDeclarations.end(), subInfo.fileDeclarations.begin(), subInfo.fileDeclarations.end());
+				structInfo.fields.push_back(std::make_unique<SubstructField>(name, std::move(subInfo), typeStr, size));
+			}
+		}
+		else if (type->isArrayType())
+		{
+			if (const clang::ConstantArrayType* arrayType = context.getAsConstantArrayType(type)) {
+				const auto elementSize = context.getTypeSize(arrayType->getElementType()) / 8;
+				const auto numberOfElements = arrayType->getSize().getZExtValue();
+
+				structInfo.fields.push_back(std::make_unique<ConstantArrayField>(name, structInfo.name, typeStr, elementSize, numberOfElements));
+			}
+		}
+		else if (type->isEnumeralType()) // Process enum
+		{
+			std::map<std::string, long> enumFields;
+
+			const auto enumDecl = type->getAs<clang::EnumType>()->getDecl();
+			if (enumDecl->isCompleteDefinition()) {
+				for (auto it = enumDecl->enumerator_begin();
+					it != enumDecl->enumerator_end(); ++it) {
+					clang::EnumConstantDecl* enumConst = *it;
+					std::string name = enumConst->getNameAsString();
+					long value =
+						static_cast<long>(enumConst->getInitVal().getSExtValue());
+
+					// Add to map
+					enumFields[name] = value;
+				}
+			}
+
+			structInfo.fields.push_back(std::make_unique<EnumField>(
+				//TODO: get underlying type, remove hardcoded one
+				"uint8_t", structInfo.name, name, size, enumFields));
+		}
+		else {
+			// Trivial type
+
+			structInfo.fields.push_back(std::make_unique<StructTrivialField>(
+				typeStr, structInfo.name, name, size));
+		}
+	}
 }
 
 class StructVisitor : public RecursiveASTVisitor<StructVisitor> {
@@ -431,70 +608,22 @@ public:
 			// printStruct(declaration, 0);
 			StructInfo structInfo{ .name = targetStructName };
 
-			processStruct(declaration, structInfo);
+			processStruct(declaration, *context, structInfo, structInfo);
 
 			const auto includes = generateIncludes(structInfo);
-			const auto dissectorFunction = generateDissector(structInfo);
+			const auto dissectorFunction = generateMainDissector(structInfo);
 			const auto protoRegister = generateProtoRegister(structInfo);
 			const auto handoff = generateRegisterHandoff(structInfo);
 			const auto fileDeclarations = generateFileDeclarations(structInfo);
 
-			GeneratedParserString = includes + "\n\n" + fileDeclarations + "\n\n" +
-				dissectorFunction + "\n\n" + protoRegister +
-				"\n\n" + handoff;
+			GeneratedParserString = "";
+			GeneratedParserString += includes + "\n\n";
+			GeneratedParserString += fileDeclarations + "\n\n";
+			GeneratedParserString += dissectorFunction + "\n\n";
+			GeneratedParserString += protoRegister + "\n\n";
+			GeneratedParserString += handoff + "\n\n";
 		}
 		return true; // Continue visiting subsequent AST nodes
-	}
-
-	void processStruct(const RecordDecl* declaration, StructInfo& structInfo) {
-		for (auto* field : declaration->fields()) {
-			const auto type = field->getType();
-			const auto name = field->getName();
-			const auto size = context->getTypeSize(type) / 8;
-
-			if (const RecordType* RT = field->getType()->getAs<RecordType>()) {
-				if (RT->getDecl()->isThisDeclarationADefinition()) {
-					// Process Struct
-				}
-			}
-			else if (type->isArrayType())
-			{
-				if (const clang::ConstantArrayType* arrayType = context->getAsConstantArrayType(type)) {
-					const auto elementSize = context->getTypeSize(arrayType->getElementType()) / 8;
-					const auto numberOfElements = arrayType->getSize().getZExtValue();
-
-					structInfo.fields.push_back(std::make_unique<ConstantArrayField>(name.str(), type.getAsString(), elementSize, numberOfElements));
-				}
-			}
-			else if (type->isEnumeralType()) // Process enum
-			{
-				std::map<std::string, long> enumFields;
-
-				const auto enumDecl = type->getAs<clang::EnumType>()->getDecl();
-				if (enumDecl->isCompleteDefinition()) {
-					for (auto it = enumDecl->enumerator_begin();
-						it != enumDecl->enumerator_end(); ++it) {
-						clang::EnumConstantDecl* enumConst = *it;
-						std::string name = enumConst->getNameAsString();
-						long value =
-							static_cast<long>(enumConst->getInitVal().getSExtValue());
-
-						// Add to map
-						enumFields[name] = value;
-					}
-				}
-
-				structInfo.fields.push_back(std::make_unique<EnumField>(
-					//TODO: get underlying type, remove hardcoded one
-					EnumField("uint8_t", name.str(), size, enumFields)));
-			}
-			else {
-				// Trivial type
-
-				structInfo.fields.push_back(std::make_unique<StructTrivialField>(
-					StructTrivialField(type.getAsString(), name.str(), size)));
-			}
-		}
 	}
 
 	void printStruct(RecordDecl* declaration, int indentLevel) {
