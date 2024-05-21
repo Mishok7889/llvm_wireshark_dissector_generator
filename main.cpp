@@ -6,7 +6,7 @@
 //		string(char[]) processing   -- 
 //		array(uint8_t[]) processing	-- Ok
 //		enum processing				-- Ok
-//		substruct processing		--
+//		substruct processing		-- Ok
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/ASTConsumers.h>
@@ -82,6 +82,7 @@ public:
 
 struct StructInfo {
 	std::string name;
+	std::string inCodeName;
 	std::vector<std::unique_ptr<StructField>> fields;
 	std::vector<std::string> fileDeclarations;
 	std::vector<std::string> subTreeItems;
@@ -119,6 +120,7 @@ static const std::map<std::string, std::string> typesMap{
 	{"int64_t", "FT_INT64"},   {"long", "FT_INT64"},
 
 	{"char", "FT_CHAR"},       {"bool", "FT_BOOLEAN"},
+	{"_Bool", "FT_BOOLEAN"},
 };
 
 std::string mapTypeToWiresharkType(const StructField& field) {
@@ -497,7 +499,7 @@ std::string generateSubDissector(StructInfo& structInfo)
 	res += +"static int dissect_" + structInfo.getLowercaseName()
 		+ "(tvbuff_t* tvb, packet_info* pinfo, proto_tree* subtree, int offset){ \n";
 
-	res += "proto_tree *" + lowercaseName + "_tree = proto_tree_add_subtree(subtree, tvb, offset, -1, " + hfIndex + ", 0, \"\"); \n\n";
+	res += "proto_tree *" + lowercaseName + "_tree = proto_tree_add_subtree(subtree, tvb, offset, -1, " + hfIndex + ", 0, \"" + structInfo.inCodeName + "\"); \n\n";
 
 	res += generateDissectorBody(structInfo);
 
@@ -543,7 +545,7 @@ void processStruct(const RecordDecl* declaration, const ASTContext& context, Str
 				// Process Struct
 
 				const auto record = RT->getDecl();
-				StructInfo subInfo{ .name = typeStr };
+				StructInfo subInfo{ .name = typeStr, .inCodeName = name};
 
 				processStruct(record, context, subInfo, structInfo);
 

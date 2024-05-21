@@ -5,7 +5,7 @@ enum class D { AA, BB, CC };
 struct C
 {
   int a;
-  //bool b;
+  bool b;
   D dd;
 };
 
