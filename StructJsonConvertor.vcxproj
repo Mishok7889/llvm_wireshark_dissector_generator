@@ -139,9 +139,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="IStruct.cpp" />
+    <ClCompile Include="struct_fields.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IStruct.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="struct_fields.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StructJsonConvertor.rc" />
